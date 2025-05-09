@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>이메일 인증</title>
+    <meta charset="UTF-8">
+    <script>
+        let sessionId = null;
+
+        function sendVerification() {
+            const email = document.getElementById("email").value;
+
+            fetch('/email-confirm/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                sessionId = data.sessionId;
+                alert("인증 메일을 보냈어요!");
+                document.getElementById("verifySection").style.display = "block";
+            });
+        }
+
+        function confirmVerification() {
+            fetch(`/email-confirm/verify?sessionId=${sessionId}`)
+                .then(res => res.text())
+                .then(result => {
+                    alert(result);
+                });
+        }
+    </script>
+</head>
+<body>
+<h2>이메일 인증 테스트</h2>
+
+<label>이메일 주소:</label>
+<input type="email" id="email">
+<button onclick="sendVerification()">인증 메일 보내기</button>
+
+<div id="verifySection" style="display:none; margin-top:20px;">
+    <button onclick="confirmVerification()">확인 완료</button>
+</div>
+</body>
+</html>

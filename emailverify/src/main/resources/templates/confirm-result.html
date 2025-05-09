@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>이메일 인증 결과</title>
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    const verified = [[${verified}]];  // 여기가 핵심!
+    window.onload = function() {
+        if (verified) {
+            alert("✅ 인증이 완료되었습니다.");
+        } else {
+            alert("❌ 인증에 실패했습니다.");
+        }
+        window.close(); // 창 닫기
+    }
+    /*]]>*/
+  </script>
+</head>
+<body>
+</body>
+</html>

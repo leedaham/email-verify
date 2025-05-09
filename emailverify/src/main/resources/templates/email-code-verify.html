@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>이메일 인증</title>
+    <meta charset="UTF-8">
+    <script>
+        function sendCode() {
+            const email = document.getElementById("email").value;
+            if (!email) {
+                alert("이메일을 입력해주세요.");
+                return;
+            }
+
+            fetch("/email-code/send", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `email=${encodeURIComponent(email)}`
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("코드 전송 실패");
+                return response.text();
+            })
+            .then(msg => {
+                alert("인증 코드가 이메일로 전송되었습니다.");
+                document.getElementById("verify-section").style.display = "block";
+                startTimer(300); // 5분
+                document.getElementById("message").innerText = "";
+            })
+            .catch(err => {
+                alert("인증 코드 전송 중 오류가 발생했습니다.");
+                console.error(err);
+            });
+        }
+
+        function verifyCode() {
+            const code = document.getElementById("code").value;
+            fetch("/email-code/verify", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `code=${encodeURIComponent(code)}`
+            })
+            .then(response => response.text().then(text => ({ status: response.status, body: text })))
+            .then(({ status, body }) => {
+                const msgEl = document.getElementById("message");
+                if (status === 200) {
+                    msgEl.style.color = "green";
+                    msgEl.innerText = "🎉 인증 성공!";
+                    clearInterval(timerInterval);
+                } else {
+                    msgEl.style.color = "red";
+                    msgEl.innerText = body;
+                }
+            });
+        }
+
+        let timerInterval;
+        function startTimer(seconds) {
+            clearInterval(timerInterval); // 중복 방지
+            const timerEl = document.getElementById("timer");
+            let remaining = seconds;
+
+            timerInterval = setInterval(() => {
+                const min = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const sec = String(remaining % 60).padStart(2, '0');
+                timerEl.textContent = `${min}:${sec}`;
+
+                if (--remaining < 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById("verify-section").style.display = "none";
+                    alert("인증 시간이 만료되었습니다. 다시 시도해주세요.");
+                }
+            }, 1000);
+        }
+    </script>
+</head>
+<body>
+<h2>📧 이메일 인증</h2>
+
+<!-- 이메일 입력 -->
+<div>
+    <input type="email" id="email" placeholder="이메일 입력" required />
+    <button onclick="sendCode()">인증 코드 보내기</button>
+</div>
+
+<!-- 인증 코드 검증 -->
+<div id="verify-section" style="display:none; margin-top:20px;">
+    <p>📬 인증 코드를 입력해주세요</p>
+    <input type="text" id="code" placeholder="인증 코드" required />
+    <button onclick="verifyCode()">확인</button>
+    <p>⏱ 남은 시간: <span id="timer">05:00</span></p>
+</div>
+
+<!-- 결과 메시지 -->
+<p id="message" style="margin-top: 20px;"></p>
+</body>
+</html>

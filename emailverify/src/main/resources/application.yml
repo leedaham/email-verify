@@ -1,0 +1,29 @@
+# application.yml
+spring:
+  application:
+    name:emailverify
+  mail:
+#    host: smtp.gmail.com
+#    port: 587
+    host: localhost
+    port: 1025
+    username: pharosinfodaham@gmail.com
+    password:
+#    password: ixmwxdeiiqvhhcbx
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  redis:
+    host: localhost
+    port: 6379
+    # 필요시 설정
+    # password: yourpassword
+    timeout: 2000
+
+
+
+
+
+mail:
+  from: noreply-test@pharosinfo.com
